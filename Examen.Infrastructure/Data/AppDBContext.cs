@@ -4,13 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Examen.ApplicationCore.Domain;
+using Examen.ApplicationCore.Interfaces;
 using Examen.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Examen.Infrastructure.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IAppDbContext
     {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
+        {
+        }
+
+       
         public DbSet<Laboratoire> Laboratoires { get; set; }
         public DbSet<Infirmier> Infirmiers { get; set; }
         public DbSet<Analyse> Analyses { get; set; }

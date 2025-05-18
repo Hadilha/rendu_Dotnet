@@ -1,6 +1,12 @@
 ﻿using System;
-using Examen.Infrastructure.Data;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Examen.ApplicationCore.Domain;
+using Examen.ApplicationCore.Interfaces;
+using Examen.ApplicationCore.Services;
+using Examen.Infrastructure.Data;
 
 namespace Examen.UI.ConsoleApp
 {
@@ -8,77 +14,161 @@ namespace Examen.UI.ConsoleApp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("---- Démarrage des tests EF Core ----");
+            Console.WriteLine("Démarrage du test du Labo  !\n");
 
-            using (var context = new AppDbContext())
+            //  1) On prépare notre conteneur de services et EF Core
+            var services = new ServiceCollection();
+            services.AddDbContext<IAppDbContext, AppDbContext>(opts =>
+                opts.UseSqlServer("Server=.;Database=LaboHadil;Trusted_Connection=True;"));
+            services.AddScoped<IBilanService, BilanService>();
+            services.AddScoped<IInfirmierService, InfirmierService>();
+            services.AddScoped<IPatientService, PatientService>();
+
+            var provider = services.BuildServiceProvider();
+
+            //  2) On crée une portée pour peupler la base
+            using (var scope = provider.CreateScope())
             {
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
+                var ctx = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
-                Console.WriteLine("\n✔️ Base de données recréée.");
+                Console.WriteLine("🔄 Réinitialisation de la base de données…");
+                ctx.Database.EnsureDeleted();
+                ctx.Database.EnsureCreated();
+                Console.WriteLine("✅ Base remise à zéro.\n");
 
+                // --- Création d’un laboratoire ---
                 var labo = new Laboratoire
                 {
-                    Intitule = "Laboratoire Central",
-                    Localisation = "Rue Principale"
+                    Intitule = "Laboratoire El-Medina",
+                    Localisation = "Avenue Habib Bourguiba"
                 };
-                context.Laboratoires.Add(labo);
-                context.SaveChanges();
-                Console.WriteLine($" Laboratoire ajouté : {labo.Intitule}");
+                ctx.Laboratoires.Add(labo);
 
-                var infirmier = new Infirmier
+                // --- Deux infirmiers (Mohamed & Sarra) ---
+                var infirmierMohamed = new Infirmier
                 {
-                    NomComplet = "Hadj Alouane",
+                    NomComplet = "Mohamed Ben Ali",
+                    Specialite = Specialite.Hematologie
+                };
+                var infirmierSarra = new Infirmier
+                {
+                    NomComplet = "Sarra Lamine",
                     Specialite = Specialite.Biochimie
                 };
-                labo.Infirmiers = new List<Infirmier> { infirmier };
-                context.Infirmiers.Add(infirmier);
-                context.SaveChanges();
-                Console.WriteLine($"Infirmier ajouté : {infirmier.NomComplet} (spécialité : {infirmier.Specialite})");
+                labo.Infirmiers = new List<Infirmier> { infirmierMohamed, infirmierSarra };
+                ctx.Infirmiers.AddRange(infirmierMohamed, infirmierSarra);
 
-                var patient = new Patient
+                // --- Un patient de test (Yasmine) ---
+                var patientYasmine = new Patient
                 {
-                    CodePatient = "P1001",
-                    NomComplet = "Amina B.",
-                    EmailPatient = "amina.b@example.com",
-                    NumeroTel = "55112233",
-                    Informations = "Allergique à la pénicilline"
+                    CodePatient = "H2024",
+                    NomComplet = "Yasmine Trabelsi",
+                    EmailPatient = "yasmine.trabelsi@example.tn",
+                    NumeroTel = "98 765 432",
+                    Informations = "Pas d’allergies connues"
                 };
-                context.Patients.Add(patient);
-                context.SaveChanges();
-                Console.WriteLine($" Patient ajouté : {patient.NomComplet}");
+                ctx.Patients.Add(patientYasmine);
 
-               
+                // --- Une analyse (Globule Rouge) ---
                 var analyse = new Analyse
                 {
-                    TypeAnalyse = "Analyse de sang",
+                    TypeAnalyse = "Numération Globulaire",
                     DureeResultat = 48,
-                    PrixAnalyse = 120.0,
-                    ValeurAnalyse = 4.8f,
-                    ValeurMaxNormale = 6.0f,
-                    ValeurMinNormale = 4.0f
+                    PrixAnalyse = 65.0,
+                    ValeurMinNormale = 4.0f,
+                    ValeurMaxNormale = 5.5f,
+                    ValeurAnalyse = 4.7f,
+                    // Note : on fixera LaboratoireId après SaveChanges
                 };
-                context.Analyses.Add(analyse);
-                context.SaveChanges();
-                Console.WriteLine($" Analyse ajoutée : {analyse.TypeAnalyse} ({analyse.PrixAnalyse} DT)");
+                ctx.Analyses.Add(analyse);
 
-                var bilan = new Bilan
+                ctx.SaveChanges();
+
+                // On attribue l’analyse et l’infirmier Mohamed au labo
+                analyse = ctx.Analyses.First();
+                infirmierMohamed = ctx.Infirmiers.First(i => i.NomComplet.StartsWith("Mohamed"));
+
+                // --- Création de bilans ---
+                // Bilan 1 : 1er prélèvement il y a 7 jours (pas de remise)
+                var bilan1 = new Bilan
                 {
-                    DatePrelevement = DateTime.Now,
-                    EmailMedecin = "dr.malek@hopital.tn",
+                    DatePrelevement = DateTime.Now.AddDays(-7),
+                    EmailMedecin = "dr.khaled@hopital.tn",
                     Paye = true,
-                    CodePatient = patient.CodePatient,
-                    InfirmierId = infirmier.InfirmierId,
+                    CodePatient = patientYasmine.CodePatient,
+                    InfirmierId = infirmierMohamed.InfirmierId,
                     AnalyseId = analyse.AnalyseId
                 };
-                context.Bilans.Add(bilan);
-                context.SaveChanges();
-                Console.WriteLine(" Bilan créé et lié aux entités précédentes.");
 
-                Console.WriteLine("\n Tous les tests sont terminés avec succès.");
+                // Bilan 2 : 8ème prélèvement aujourd’hui (remise automatique)
+                // On simule 7 prélèvements précédents pour dépasser le seuil
+                for (int i = 1; i <= 7; i++)
+                {
+                    ctx.Bilans.Add(new Bilan
+                    {
+                        DatePrelevement = DateTime.Now.AddDays(-30 - i),
+                        EmailMedecin = "dr.khaled@hopital.tn",
+                        Paye = true,
+                        CodePatient = patientYasmine.CodePatient,
+                        InfirmierId = infirmierMohamed.InfirmierId,
+                        AnalyseId = analyse.AnalyseId
+                    });
+                }
+
+                var bilan2 = new Bilan
+                {
+                    DatePrelevement = DateTime.Now,
+                    EmailMedecin = "dr.khaled@hopital.tn",
+                    Paye = false,
+                    CodePatient = patientYasmine.CodePatient,
+                    InfirmierId = infirmierMohamed.InfirmierId,
+                    AnalyseId = analyse.AnalyseId
+                };
+                ctx.Bilans.AddRange(bilan1, bilan2);
+
+                ctx.SaveChanges();
+                Console.WriteLine(" Données de test insérées.\n");
+
+                //  3) On récupère nos services pour les tester
+                var bilanSvc = scope.ServiceProvider.GetRequiredService<IBilanService>();
+                var infirmierSvc = scope.ServiceProvider.GetRequiredService<IInfirmierService>();
+                var patientSvc = scope.ServiceProvider.GetRequiredService<IPatientService>();
+
+                // --- Test du calcul du montant ---
+                Console.WriteLine(" Montants à payer :");
+                Console.WriteLine($" • 1er prélèvement : {bilanSvc.CalculerMontantTotal(bilan1):0.00} DT");
+                Console.WriteLine($" • 8ème prélèvement (remise) : {bilanSvc.CalculerMontantTotal(bilan2):0.00} DT\n");
+
+                // --- Test de la date de récupération ---
+                var recup = bilanSvc.ObtenirDateRecuperation(bilan2);
+                Console.WriteLine($" Résultat disponible le : {recup:dd/MM/yyyy HH:mm}\n");
+
+                // --- Statistiques infirmiers ---
+                Console.WriteLine(" Répartition des spécialités :");
+                var pctHema = infirmierSvc.ObtenirPourcentageParSpecialite(Specialite.Hematologie);
+                var pctBio = infirmierSvc.ObtenirPourcentageParSpecialite(Specialite.Biochimie);
+                Console.WriteLine($" • Hématologie : {pctHema}%");
+                Console.WriteLine($" • Biochimie : {pctBio}%\n");
+
+                // --- Analyses anormales de Yasmine ---
+                Console.WriteLine(" Analyses hors normes (Yasmine) :");
+                var anomalies = patientSvc.ObtenirAnalysesAnormalesParBilan(patientYasmine.CodePatient);
+                if (!anomalies.Any())
+                {
+                    Console.WriteLine(" Aucune anomalie détectée cette année.");
+                }
+                else
+                {
+                    foreach (var kv in anomalies)
+                    {
+                        Console.WriteLine($"  Bilan du {kv.Key.DatePrelevement:dd/MM/yyyy} :");
+                        foreach (var a in kv.Value)
+                            Console.WriteLine($"    - {a.TypeAnalyse} = {a.ValeurAnalyse}");
+                    }
+                }
             }
 
-            Console.WriteLine("\nAppuyez sur une touche pour quitter...");
+            Console.WriteLine("\nMerci d’avoir testé ! Appuyez sur une touche pour quitter.");
             Console.ReadKey();
         }
     }
