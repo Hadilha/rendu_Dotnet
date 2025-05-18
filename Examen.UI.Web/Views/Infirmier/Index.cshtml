@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Examen.ApplicationCore.Domain.Infirmier>
+
+@{
+    ViewData["Title"] = "Liste des Infirmiers";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<a asp-action="Create" class="btn btn-success mb-3">Ajouter un nouvel infirmier</a>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-light">
+        <tr>
+            <th>Nom Complet</th>
+            <th>Spécialité</th>
+            <th>Laboratoire</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var inf in Model)
+        {
+            <tr>
+                <td>@inf.NomComplet</td>
+                <td>@inf.Specialite</td>
+                <td>@inf.Laboratoire?.Intitule</td>
+                <td>
+                    <a asp-action="Patients" asp-route-id="@inf.InfirmierId" class="btn btn-sm btn-outline-info">
+                        Voir les patients
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

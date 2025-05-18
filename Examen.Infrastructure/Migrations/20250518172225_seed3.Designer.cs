@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Examen.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250518131322_HadilHadjAlouaneMigration")]
-    partial class HadilHadjAlouaneMigration
+    [Migration("20250518172225_seed3")]
+    partial class seed3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,9 @@ namespace Examen.Infrastructure.Migrations
                     b.Property<int>("DureeResultat")
                         .HasColumnType("int");
 
+                    b.Property<int>("LaboratoireId")
+                        .HasColumnType("int");
+
                     b.Property<double>("PrixAnalyse")
                         .HasColumnType("float");
 
@@ -55,6 +58,19 @@ namespace Examen.Infrastructure.Migrations
                     b.HasKey("AnalyseId");
 
                     b.ToTable("Analyses");
+
+                    b.HasData(
+                        new
+                        {
+                            AnalyseId = 1,
+                            DureeResultat = 24,
+                            LaboratoireId = 1,
+                            PrixAnalyse = 50.0,
+                            TypeAnalyse = "Numération globulaire",
+                            ValeurAnalyse = 4.8f,
+                            ValeurMaxNormale = 5.5f,
+                            ValeurMinNormale = 4f
+                        });
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Bilan", b =>
@@ -95,7 +111,7 @@ namespace Examen.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InfirmierId"));
 
-                    b.Property<int?>("LaboratoireId")
+                    b.Property<int>("LaboratoireId")
                         .HasColumnType("int");
 
                     b.Property<string>("NomComplet")
@@ -126,13 +142,19 @@ namespace Examen.Infrastructure.Migrations
 
                     b.Property<string>("Localisation")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("AdresseLabo");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("LaboratoireId");
 
                     b.ToTable("Laboratoires");
+
+                    b.HasData(
+                        new
+                        {
+                            LaboratoireId = 1,
+                            Intitule = "Laboratoire Central",
+                            Localisation = "Centre-ville"
+                        });
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Patient", b =>
@@ -160,6 +182,16 @@ namespace Examen.Infrastructure.Migrations
                     b.HasKey("CodePatient");
 
                     b.ToTable("Patients");
+
+                    b.HasData(
+                        new
+                        {
+                            CodePatient = "P0001",
+                            EmailPatient = "sarra@example.tn",
+                            Informations = "Aucune",
+                            NomComplet = "Sarra Trabelsi",
+                            NumeroTel = "99887766"
+                        });
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Bilan", b =>
@@ -191,9 +223,13 @@ namespace Examen.Infrastructure.Migrations
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Infirmier", b =>
                 {
-                    b.HasOne("Examen.ApplicationCore.Domain.Laboratoire", null)
+                    b.HasOne("Examen.ApplicationCore.Domain.Laboratoire", "Laboratoire")
                         .WithMany("Infirmiers")
-                        .HasForeignKey("LaboratoireId");
+                        .HasForeignKey("LaboratoireId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Laboratoire");
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Analyse", b =>

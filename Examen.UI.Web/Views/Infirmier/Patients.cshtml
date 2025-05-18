@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Examen.ApplicationCore.Domain.Patient>
+
+@{
+    ViewData["Title"] = "Patients associés";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!Model.Any())
+{
+    <p>Aucun patient associé à cet infirmier.</p>
+}
+else
+{
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Code Patient</th>
+                <th>Nom Complet</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td>@p.CodePatient</td>
+                    <td>@p.NomComplet</td>
+                    <td>@p.EmailPatient</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Index" class="btn btn-secondary mt-3">Retour</a>

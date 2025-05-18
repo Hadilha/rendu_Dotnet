@@ -13,6 +13,8 @@ namespace Examen.ApplicationCore.Domain
         public Specialite Specialite { get; set; }
 
         public ICollection<Bilan> Bilans { get; set; } = new List<Bilan>();
+        public int LaboratoireId { get; set; }
+        public Laboratoire Laboratoire { get; set; }
     }
 
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Examen.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class HadilHadjAlouaneMigration : Migration
+    public partial class seed3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,7 +22,8 @@ namespace Examen.Infrastructure.Migrations
                     TypeAnalyse = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ValeurAnalyse = table.Column<float>(type: "real", nullable: false),
                     ValeurMaxNormale = table.Column<float>(type: "real", nullable: false),
-                    ValeurMinNormale = table.Column<float>(type: "real", nullable: false)
+                    ValeurMinNormale = table.Column<float>(type: "real", nullable: false),
+                    LaboratoireId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,7 +37,7 @@ namespace Examen.Infrastructure.Migrations
                     LaboratoireId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Intitule = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AdresseLabo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    Localisation = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -66,7 +67,7 @@ namespace Examen.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     NomComplet = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Specialite = table.Column<int>(type: "int", nullable: false),
-                    LaboratoireId = table.Column<int>(type: "int", nullable: true)
+                    LaboratoireId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -75,7 +76,8 @@ namespace Examen.Infrastructure.Migrations
                         name: "FK_Infirmiers_Laboratoires_LaboratoireId",
                         column: x => x.LaboratoireId,
                         principalTable: "Laboratoires",
-                        principalColumn: "LaboratoireId");
+                        principalColumn: "LaboratoireId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -111,6 +113,21 @@ namespace Examen.Infrastructure.Migrations
                         principalColumn: "CodePatient",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "Analyses",
+                columns: new[] { "AnalyseId", "DureeResultat", "LaboratoireId", "PrixAnalyse", "TypeAnalyse", "ValeurAnalyse", "ValeurMaxNormale", "ValeurMinNormale" },
+                values: new object[] { 1, 24, 1, 50.0, "Numération globulaire", 4.8f, 5.5f, 4f });
+
+            migrationBuilder.InsertData(
+                table: "Laboratoires",
+                columns: new[] { "LaboratoireId", "Intitule", "Localisation" },
+                values: new object[] { 1, "Laboratoire Central", "Centre-ville" });
+
+            migrationBuilder.InsertData(
+                table: "Patients",
+                columns: new[] { "CodePatient", "EmailPatient", "Informations", "NomComplet", "NumeroTel" },
+                values: new object[] { "P0001", "sarra@example.tn", "Aucune", "Sarra Trabelsi", "99887766" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bilans_AnalyseId",

@@ -18,5 +18,6 @@ namespace Examen.ApplicationCore.Domain
         public float ValeurMinNormale { get; set; }
 
         public ICollection<Bilan> Bilans { get; set; }
+        public int LaboratoireId { get; set; }
     }
 }
