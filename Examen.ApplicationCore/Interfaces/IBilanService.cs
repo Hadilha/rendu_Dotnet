@@ -10,6 +10,8 @@ namespace Examen.ApplicationCore.Interfaces
     public interface IBilanService : IService<Bilan>
     {
 
+        double CalculerMontantTotal(Bilan b);
+        DateTime? GetDateRecuperationBilan(Bilan b);
 
 
     }

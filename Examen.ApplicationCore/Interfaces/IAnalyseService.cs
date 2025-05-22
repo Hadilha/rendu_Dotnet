@@ -9,5 +9,7 @@ namespace Examen.ApplicationCore.Interfaces
 {
     public interface IAnalyseService : IService<Analyse>
     {
+        IEnumerable<Analyse> GetAnalysesAnormalesDeLAnnee(Patient patient);
+
     }
 }
