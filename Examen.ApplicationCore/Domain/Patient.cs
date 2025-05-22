@@ -22,6 +22,6 @@ namespace Examen.ApplicationCore.Domain
         public string NomComplet { get; set; }
         public string NumeroTel { get; set; }
 
-        public ICollection<Bilan> Bilans { get; set; }
+        public virtual ICollection<Bilan> Bilans { get; set; }
     }
 }

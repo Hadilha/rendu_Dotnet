@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace Examen.ApplicationCore.Interfaces
 {
-    public interface IBilanService
+    public interface IBilanService : IService<Bilan>
     {
-        decimal CalculerMontantTotal(Bilan bilan);
-        DateTime ObtenirDateRecuperation(Bilan bilan);
+
 
 
     }

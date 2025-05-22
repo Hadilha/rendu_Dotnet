@@ -12,14 +12,14 @@ namespace Examen.ApplicationCore.Domain
         public string EmailMedecin { get; set; }
         public bool Paye { get; set; }
 
-        public int InfirmierId { get; set; }
-        public Infirmier Infirmier { get; set; }
+        public int InfirmierFk { get; set; }
+        public virtual Infirmier Infirmier { get; set; }
 
-        public string CodePatient { get; set; }
-        public Patient Patient { get; set; }
+        public virtual  Patient Patient { get; set; }
+        public string PatientFk { get; set; }
 
-        public int AnalyseId { get; set; }
-        public Analyse Analyse { get; set; }
+
+        public virtual ICollection<Analyse> Analyses { get; set; }
 
     }
 }

@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Examen.ApplicationCore.Interfaces
 {
-    public interface IPatientService
+    public interface IPatientService : IService<Patient>
     {
-        IDictionary<Bilan, List<Analyse>> ObtenirAnalysesAnormalesParBilan(string codePatient);
 
     }
 }

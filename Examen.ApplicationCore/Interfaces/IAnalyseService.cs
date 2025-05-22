@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 
 namespace Examen.ApplicationCore.Interfaces
 {
-    public interface IInfirmierService : IService<Infirmier>
+    public interface IAnalyseService : IService<Analyse>
     {
-       
-
     }
 }

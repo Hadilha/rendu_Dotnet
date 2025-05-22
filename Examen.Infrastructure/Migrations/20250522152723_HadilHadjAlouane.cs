@@ -6,30 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Examen.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class seed3 : Migration
+    public partial class HadilHadjAlouane : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Analyses",
-                columns: table => new
-                {
-                    AnalyseId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DureeResultat = table.Column<int>(type: "int", nullable: false),
-                    PrixAnalyse = table.Column<double>(type: "float", nullable: false),
-                    TypeAnalyse = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ValeurAnalyse = table.Column<float>(type: "real", nullable: false),
-                    ValeurMaxNormale = table.Column<float>(type: "real", nullable: false),
-                    ValeurMinNormale = table.Column<float>(type: "real", nullable: false),
-                    LaboratoireId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Analyses", x => x.AnalyseId);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Laboratoires",
                 columns: table => new
@@ -37,7 +18,7 @@ namespace Examen.Infrastructure.Migrations
                     LaboratoireId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Intitule = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Localisation = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    AdresseLabo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -66,8 +47,9 @@ namespace Examen.Infrastructure.Migrations
                     InfirmierId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     NomComplet = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Specialite = table.Column<int>(type: "int", nullable: false),
-                    LaboratoireId = table.Column<int>(type: "int", nullable: false)
+                    specialite = table.Column<int>(type: "int", nullable: false),
+                    LaboratoireId = table.Column<int>(type: "int", nullable: false),
+                    LaboratoireFK = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,59 +67,66 @@ namespace Examen.Infrastructure.Migrations
                 columns: table => new
                 {
                     DatePrelevement = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    InfirmierId = table.Column<int>(type: "int", nullable: false),
-                    CodePatient = table.Column<string>(type: "nvarchar(5)", nullable: false),
+                    InfirmierFk = table.Column<int>(type: "int", nullable: false),
+                    PatientFk = table.Column<string>(type: "nvarchar(5)", nullable: false),
                     EmailMedecin = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Paye = table.Column<bool>(type: "bit", nullable: false),
-                    AnalyseId = table.Column<int>(type: "int", nullable: false)
+                    Paye = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Bilans", x => new { x.InfirmierId, x.CodePatient, x.DatePrelevement });
+                    table.PrimaryKey("PK_Bilans", x => new { x.InfirmierFk, x.PatientFk, x.DatePrelevement });
                     table.ForeignKey(
-                        name: "FK_Bilans_Analyses_AnalyseId",
-                        column: x => x.AnalyseId,
-                        principalTable: "Analyses",
-                        principalColumn: "AnalyseId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Bilans_Infirmiers_InfirmierId",
-                        column: x => x.InfirmierId,
+                        name: "FK_Bilans_Infirmiers_InfirmierFk",
+                        column: x => x.InfirmierFk,
                         principalTable: "Infirmiers",
                         principalColumn: "InfirmierId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Bilans_Patients_CodePatient",
-                        column: x => x.CodePatient,
+                        name: "FK_Bilans_Patients_PatientFk",
+                        column: x => x.PatientFk,
                         principalTable: "Patients",
                         principalColumn: "CodePatient",
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
+            migrationBuilder.CreateTable(
+                name: "Analyses",
+                columns: table => new
+                {
+                    AnalyseId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DureeResultat = table.Column<int>(type: "int", nullable: false),
+                    PrixAnalyse = table.Column<double>(type: "float", nullable: false),
+                    TypeAnalyse = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ValeurAnalyse = table.Column<float>(type: "real", nullable: false),
+                    ValeurMaxNormale = table.Column<float>(type: "real", nullable: false),
+                    ValeurMinNormale = table.Column<float>(type: "real", nullable: false),
+                    BilansInfirmierFk = table.Column<int>(type: "int", nullable: false),
+                    BilansPatientFk = table.Column<string>(type: "nvarchar(5)", nullable: false),
+                    BilansDatePrelevement = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    BilanId = table.Column<int>(type: "int", nullable: false),
+                    LaboratoireId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Analyses", x => x.AnalyseId);
+                    table.ForeignKey(
+                        name: "FK_Analyses_Bilans_BilansInfirmierFk_BilansPatientFk_BilansDatePrelevement",
+                        columns: x => new { x.BilansInfirmierFk, x.BilansPatientFk, x.BilansDatePrelevement },
+                        principalTable: "Bilans",
+                        principalColumns: new[] { "InfirmierFk", "PatientFk", "DatePrelevement" },
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Analyses_BilansInfirmierFk_BilansPatientFk_BilansDatePrelevement",
                 table: "Analyses",
-                columns: new[] { "AnalyseId", "DureeResultat", "LaboratoireId", "PrixAnalyse", "TypeAnalyse", "ValeurAnalyse", "ValeurMaxNormale", "ValeurMinNormale" },
-                values: new object[] { 1, 24, 1, 50.0, "Numération globulaire", 4.8f, 5.5f, 4f });
-
-            migrationBuilder.InsertData(
-                table: "Laboratoires",
-                columns: new[] { "LaboratoireId", "Intitule", "Localisation" },
-                values: new object[] { 1, "Laboratoire Central", "Centre-ville" });
-
-            migrationBuilder.InsertData(
-                table: "Patients",
-                columns: new[] { "CodePatient", "EmailPatient", "Informations", "NomComplet", "NumeroTel" },
-                values: new object[] { "P0001", "sarra@example.tn", "Aucune", "Sarra Trabelsi", "99887766" });
+                columns: new[] { "BilansInfirmierFk", "BilansPatientFk", "BilansDatePrelevement" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bilans_AnalyseId",
+                name: "IX_Bilans_PatientFk",
                 table: "Bilans",
-                column: "AnalyseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Bilans_CodePatient",
-                table: "Bilans",
-                column: "CodePatient");
+                column: "PatientFk");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Infirmiers_LaboratoireId",
@@ -149,10 +138,10 @@ namespace Examen.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Bilans");
+                name: "Analyses");
 
             migrationBuilder.DropTable(
-                name: "Analyses");
+                name: "Bilans");
 
             migrationBuilder.DropTable(
                 name: "Infirmiers");

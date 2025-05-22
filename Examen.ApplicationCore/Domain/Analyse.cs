@@ -17,7 +17,8 @@ namespace Examen.ApplicationCore.Domain
         public float ValeurMaxNormale { get; set; }
         public float ValeurMinNormale { get; set; }
 
-        public ICollection<Bilan> Bilans { get; set; }
+        public virtual Bilan Bilans { get; set; }
+        public int BilanId { get; set; }
         public int LaboratoireId { get; set; }
     }
 }

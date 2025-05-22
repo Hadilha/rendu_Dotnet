@@ -5,30 +5,38 @@ using Microsoft.EntityFrameworkCore;
 
 using Examen.ApplicationCore.Interfaces;
 using Examen.ApplicationCore.Services;
-using Examen.Infrastructure.Data;
+using Examen.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) Ajouter le DbContext
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// 2) Enregistrer l’interface utilisée dans les services
-builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
-
-// 3) Enregistrer les services métiers
-builder.Services.AddScoped<IBilanService, BilanService>();
-builder.Services.AddScoped<IInfirmierService, InfirmierService>();
-builder.Services.AddScoped<IPatientService, PatientService>();
-
-// 4) Ajouter MVC
+// Add services to the container.
 builder.Services.AddControllersWithViews();
+//zid injection de dependence////////////
+builder.Services.AddDbContext<DbContext, EXContext>();
 
-// 5) Configurer les routes
+
+
+builder.Services.AddSingleton<Type>(t => typeof(GenericRepository<>));
+
+
+
+
+
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+}
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Infirmier}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

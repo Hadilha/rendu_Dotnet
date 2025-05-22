@@ -6,12 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace Examen.ApplicationCore.Services
 {
-    public class InfirmierService : Service<Infirmier>, IInfirmierService
+    public class AnalyseService : Service<Analyse>, IAnalyseService
     {
-        public InfirmierService(IUnitOfWork unitOfWork) : base(unitOfWork)
+        public AnalyseService(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
     }

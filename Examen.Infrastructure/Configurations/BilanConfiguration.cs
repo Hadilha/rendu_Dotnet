@@ -13,19 +13,16 @@ namespace Examen.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Bilan> builder)
         {
-            builder.HasKey(b => new { b.InfirmierId, b.CodePatient, b.DatePrelevement });
+            builder.HasKey(b => new { b.InfirmierFk, b.PatientFk, b.DatePrelevement });
 
             builder.HasOne(b => b.Infirmier)
-                .WithMany(i => i.Bilans)
-                .HasForeignKey(b => b.InfirmierId);
+                   .WithMany(i => i.Bilans)
+                   .HasForeignKey(b => b.InfirmierFk);
 
             builder.HasOne(b => b.Patient)
-                .WithMany(p => p.Bilans)
-                .HasForeignKey(b => b.CodePatient);
-
-            builder.HasOne(b => b.Analyse)
-                .WithMany(a => a.Bilans)
-                .HasForeignKey(b => b.AnalyseId);
+                   .WithMany(p => p.Bilans)
+                   .HasForeignKey(b => b.PatientFk);
         }
+
     }
 }

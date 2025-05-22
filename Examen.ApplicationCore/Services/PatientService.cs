@@ -10,33 +10,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Examen.ApplicationCore.Services
 {
-    public class PatientService : IPatientService
+    public class PatientService : Service<Patient>, IPatientService
     {
-        private readonly IAppDbContext _context;
-
-
-        public PatientService(IAppDbContext context)
+        public PatientService(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _context = context;
         }
 
-        public IDictionary<Bilan, List<Analyse>> ObtenirAnalysesAnormalesParBilan(string codePatient)
-        {
-            int annee = DateTime.Now.Year;
-
-            var bilans = _context.Bilans
-                .Include(b => b.Analyse)
-                .Where(b => b.CodePatient == codePatient && b.DatePrelevement.Year == annee)
-                .ToList();
-
-            return bilans
-                .Where(b => b.Analyse.ValeurAnalyse < b.Analyse.ValeurMinNormale
-                         || b.Analyse.ValeurAnalyse > b.Analyse.ValeurMaxNormale)
-                .GroupBy(b => b)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(b => b.Analyse).ToList()
-                );
-        }
+      
     }
 }
